@@ -1,136 +1,90 @@
-{
-  "nbformat": 4,
-  "nbformat_minor": 0,
-  "metadata": {
-    "colab": {
-      "provenance": [],
-      "authorship_tag": "ABX9TyP3zXqmJCe8Yp/i02eas2wK",
-      "include_colab_link": true
-    },
-    "kernelspec": {
-      "name": "python3",
-      "display_name": "Python 3"
-    },
-    "language_info": {
-      "name": "python"
-    }
-  },
-  "cells": [
-    {
-      "cell_type": "markdown",
-      "metadata": {
-        "id": "view-in-github",
-        "colab_type": "text"
-      },
-      "source": [
-        "<a href=\"https://colab.research.google.com/github/Yk369/LLM/blob/main/Untitled7.ipynb\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
-      ]
-    },
-    {
-      "cell_type": "code",
-      "execution_count": 1,
-      "metadata": {
-        "colab": {
-          "base_uri": "https://localhost:8080/"
-        },
-        "id": "Dy9WqIJ2AsoD",
-        "outputId": "92868e18-4e4f-4074-8851-d737aa93c151"
-      },
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "hello world\n"
-          ]
-        }
-      ],
-      "source": [
-        "print(\"hello world\")"
-      ]
-    },
-    {
-      "cell_type": "code",
-      "source": [
-        "sentence = \"Tokenization is the process of breaking text into words.\"\n",
-        "\n",
-        "tokens = sentence.split()\n",
-        "\n",
-        "print(tokens)\n"
-      ],
-      "metadata": {
-        "colab": {
-          "base_uri": "https://localhost:8080/"
-        },
-        "id": "gRp65rb6BOyD",
-        "outputId": "f1cf936a-6642-4e7c-8412-4b8b0e3ef9f2"
-      },
-      "execution_count": 2,
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "['Tokenization', 'is', 'the', 'process', 'of', 'breaking', 'text', 'into', 'words.']\n"
-          ]
-        }
-      ]
-    },
-    {
-      "cell_type": "code",
-      "source": [
-        "arr = [10,20,30,40,50,60]\n",
-        "\n",
-        "print(arr)"
-      ],
-      "metadata": {
-        "colab": {
-          "base_uri": "https://localhost:8080/"
-        },
-        "id": "MvNAqLMiBfAu",
-        "outputId": "9803025a-f97a-4bfa-b5c2-407b31e8779d"
-      },
-      "execution_count": 6,
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "[10, 20, 30, 40, 50, 60]\n"
-          ]
-        }
-      ]
-    },
-    {
-      "cell_type": "code",
-      "source": [
-        "import numpy as np\n",
-        "A = np.array([[1,2,3],\n",
-        "       [3,4,5]])\n",
-        "B = np.array([[1,2,3],\n",
-        "             [2,5,8],\n",
-        "             [2,4,5]])\n",
-        "C= np.dot(A,B)\n",
-        "print(C)"
-      ],
-      "metadata": {
-        "colab": {
-          "base_uri": "https://localhost:8080/"
-        },
-        "id": "62S1X6q8Cyhr",
-        "outputId": "4ccb62f7-8278-48b6-8422-14acc52caa3c"
-      },
-      "execution_count": 7,
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "[[11 24 34]\n",
-            " [21 46 66]]\n"
-          ]
-        }
-      ]
-    }
-  ]
-}
+Notebook Explanation
+🔹 Cell 1: Hello World
+print("hello world")
+
+
+Purpose:
+
+Confirms that the Python environment is working.
+
+Classic first program in any language.
+
+Output:
+
+hello world
+
+🔹 Cell 2: Simple Tokenization using split()
+sentence = "Tokenization is the process of breaking text into words."
+tokens = sentence.split()
+print(tokens)
+
+
+What happens:
+
+The split() method divides the sentence by spaces.
+
+This is a basic form of tokenization.
+
+Output:
+
+['Tokenization', 'is', 'the', 'process', 'of', 'breaking', 'text', 'into', 'words.']
+
+
+⚠️ Note:
+
+Punctuation (words.) is not removed.
+
+This is simpler but less powerful than nltk.word_tokenize().
+
+🔹 Cell 3: Python List Example
+arr = [10,20,30,40,50,60]
+print(arr)
+
+
+Purpose:
+
+Demonstrates creation and printing of a Python list.
+
+Output:
+
+[10, 20, 30, 40, 50, 60]
+
+🔹 Cell 4: Matrix Multiplication using NumPy
+import numpy as np
+
+A = np.array([[1,2,3],
+              [3,4,5]])
+
+B = np.array([[1,2,3],
+              [2,5,8],
+              [2,4,5]])
+
+C = np.dot(A,B)
+print(C)
+
+
+Explanation:
+
+A is a 2×3 matrix
+
+B is a 3×3 matrix
+
+np.dot(A, B) performs matrix multiplication
+
+Output:
+
+[[11 24 34]
+ [21 46 66]]
+
+
+This works because:
+
+Number of columns in A = number of rows in B
+
+Concepts Covered in This Notebook
+
+✔ Basic Python execution
+✔ String tokenization using split()
+✔ Python lists
+✔ NumPy arrays
+✔ Matrix multiplication
