@@ -1,0 +1,149 @@
+# ------------------------------------------------------
+# 1. IMPORTS & BROWN CORPUS SETUP
+# ------------------------------------------------------
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import matplotlib.pyplot as plt
+import numpy as np
+import nltk
+from nltk.corpus import brown
+
+# Download Brown corpus
+nltk.download('brown')
+
+torch.manual_seed(1)
+
+# ------------------------------------------------------
+# 2. BUILD VOCABULARY FROM BROWN CORPUS
+# ------------------------------------------------------
+sentences = brown.sents()[:1000]   # keep small for fast run
+words = [w.lower() for sent in sentences for w in sent]
+
+vocab = list(set(words))
+vocab_size = len(vocab)
+
+word2idx = {w: i for i, w in enumerate(vocab)}
+idx2word = {i: w for w, i in word2idx.items()}
+
+print("Vocabulary size:", vocab_size)
+
+# ------------------------------------------------------
+# 3. CREATE EMBEDDINGS → THEN REDUCE TO [1, 6, 8]
+# ------------------------------------------------------
+embed_dim = 8
+embedding = nn.Embedding(vocab_size, embed_dim)
+
+# Pick any sentence with at least 6 words
+for sent in sentences:
+    if len(sent) >= 6:
+        sample_sentence = [w.lower() for w in sent[:6]]
+        break
+
+input_ids = torch.tensor([word2idx[w] for w in sample_sentence])
+x = embedding(input_ids).unsqueeze(0)   # now shape is [1, 6, 8]
+
+print("Sample sentence:", sample_sentence)
+print("Input tensor shape:", x.shape)
+
+# ------------------------------------------------------
+# 4. SELF-ATTENTION (SCALED 0.1 → 0.40)
+# ------------------------------------------------------
+class SelfAttention(nn.Module):
+    def __init__(self, embed_dim):
+        super().__init__()
+        self.query = nn.Linear(embed_dim, embed_dim)
+        self.key   = nn.Linear(embed_dim, embed_dim)
+        self.value = nn.Linear(embed_dim, embed_dim)
+
+    def forward(self, x):
+        Q = self.query(x)
+        K = self.key(x)
+        V = self.value(x)
+
+        d_k = Q.size(-1)
+
+        scores = torch.matmul(Q, K.transpose(-1, -2)) / torch.sqrt(torch.tensor(d_k).float())
+        weights = F.softmax(scores, dim=-1)
+
+        # Scale 0.10 → 0.40
+        scaled = 0.10 + weights * (0.40 - 0.10)
+
+        output = torch.matmul(scaled, V)
+        return output, scaled
+
+self_attn = SelfAttention(embed_dim)
+sa_output, sa_weights = self_attn(x)
+
+print("Self-attention output shape:", sa_output.shape)
+
+# ------------------------------------------------------
+# 5. SELF-ATTENTION HEATMAP
+# ------------------------------------------------------
+plt.figure(figsize=(6,5))
+plt.imshow(sa_weights[0].detach(), cmap='viridis', vmin=0.10, vmax=0.40)
+plt.colorbar()
+plt.title("Self-Attention Heatmap ")
+plt.xlabel("Key positions")
+plt.ylabel("Query positions")
+plt.show()
+
+# ------------------------------------------------------
+# 6. MULTI-HEAD SELF ATTENTION
+# ------------------------------------------------------
+class MultiHeadSelfAttention(nn.Module):
+    def __init__(self, embed_dim, num_heads):
+        super().__init__()
+        self.num_heads = num_heads
+        self.head_dim = embed_dim // num_heads
+
+        assert embed_dim % num_heads == 0
+
+        self.Q = nn.Linear(embed_dim, embed_dim)
+        self.K = nn.Linear(embed_dim, embed_dim)
+        self.V = nn.Linear(embed_dim, embed_dim)
+
+        self.out = nn.Linear(embed_dim, embed_dim)
+
+    def forward(self, x):
+        batch, seq_len, embed_dim = x.shape
+
+        Q = self.Q(x).view(batch, seq_len, self.num_heads, self.head_dim).transpose(1, 2)
+        K = self.K(x).view(batch, seq_len, self.num_heads, self.head_dim).transpose(1, 2)
+        V = self.V(x).view(batch, seq_len, self.num_heads, self.head_dim).transpose(1, 2)
+
+        scores = torch.matmul(Q, K.transpose(-1, -2)) / np.sqrt(self.head_dim)
+        weights = F.softmax(scores, dim=-1)
+
+        # scale 0.10 → 0.40
+        scaled = 0.10 + weights * (0.40 - 0.10)
+
+        attention = torch.matmul(scaled, V)
+        attention = attention.transpose(1, 2).contiguous().view(batch, seq_len, embed_dim)
+
+        out = self.out(attention)
+        return out, scaled
+
+multi_attn = MultiHeadSelfAttention(embed_dim, num_heads=4)
+mh_output, mh_weights = multi_attn(x)
+
+print("Multi-head output shape:", mh_output.shape)
+
+# ------------------------------------------------------
+# 7. MULTI-HEAD HEATMAP (HEAD 1)
+# ------------------------------------------------------
+plt.figure(figsize=(6,5))
+plt.imshow(mh_weights[0][0].detach(), cmap='plasma', vmin=0.10, vmax=0.40)
+plt.colorbar()
+plt.title("Multi-Head Attention ")
+plt.xlabel("Key positions")
+plt.ylabel("Query positions")
+plt.show()
+
+# ------------------------------------------------------
+# 8. "PREDICTION" — AS YOUR SIR SAID
+# Predict next vector based on attention output
+# ------------------------------------------------------
+predicted_vector = sa_output.mean(dim=1)
+
+print("\nPredicted Next Vector:\n", predicted_vector)
